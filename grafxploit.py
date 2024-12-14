@@ -164,7 +164,7 @@ def extract_users_with_interactive_shells(passwd_content):
 
 def main():
     parser = argparse.ArgumentParser(
-    description="Automated Exploit Tool for Grafana CVE-2021-43798: Scanning and Extracting SSH Keys from Compromised Users.\n\nDeveloped by: Halim Jabbes.\n\nLinkedIn: https://www.linkedin.com/in/hxlxmj\n\nRelease Date: 22-07-2024",
+    description="Automated Exploit Tool for Grafana CVE-2021-43798: Scanning and Extracting SSH Keys from Compromised Users.\n\nDeveloped by: Halim Jabbes.\n\nLinkedIn: https://www.linkedin.com/in/hxlxmj\n\nCreated On: 22-07-2024",
     formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument("-t", "--target", help="Check a single target in the format proto://ip:port", type=str)
