@@ -66,8 +66,6 @@ The tool can be run with various command-line options to specify targets, output
 - Fazil Kabkoubi
 - Khodia Gueye
 
-- LinkedIn: [Halim Jabbes](https://www.linkedin.com/in/hxlxmj)
-
 ## Created On
 
 22-03-2025
