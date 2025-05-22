@@ -21,7 +21,7 @@ banner = f"""
      ▓▓▓▒▒    ▒▓▒▒        ▒              ▒▒                ▓▓ ▒▒      ▒    ▒          ▒▒
      ▒▒▒▒▒▒▒▒▒▒▒                                           ▒▒
 
-                                                                           version: 1.0.1
+                                                                           version: 1.0.0
                                                                                 {Style.RESET_ALL}wezoom.ca{Style.RESET_ALL}
 """
 print(banner)
