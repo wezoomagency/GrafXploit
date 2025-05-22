@@ -62,7 +62,9 @@ The tool can be run with various command-line options to specify targets, output
 ## Developed by
 
 Halim Jabbes
-Jalil Mahjoubi
+Mohammed Jalal Mahjoubi
+Fazil Kabkoubi
+Khodia Gueye
 
 - LinkedIn: [Halim Jabbes](https://www.linkedin.com/in/hxlxmj)
 
